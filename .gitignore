@@ -7,3 +7,6 @@ prime
 stage
 snap
 *.snap
+
+.vscode
+.DS_Store

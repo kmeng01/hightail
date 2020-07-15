@@ -1,5 +1,9 @@
 package org.hightail.parsers.task;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +15,7 @@ import org.hightail.TestcaseSet;
 import org.hightail.util.ProblemNameFormatter;
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
+import org.htmlparser.Parser;
 import org.htmlparser.beans.FilterBean;
 import org.htmlparser.filters.CssSelectorNodeFilter;
 import org.htmlparser.nodes.TagNode;
@@ -69,13 +74,24 @@ public class CodeForcesTaskParser implements TaskParser {
     }
 
     @Override
-    public Problem parse(String URL) throws ParserException, InterruptedException {
+    public Problem parse(String myURL) throws ParserException, InterruptedException {
 
-        URL = URL.trim();
+        myURL = myURL.trim();
         
         FilterBean fb = new FilterBean();
-        fb.setURL(URL);
         
+        try {
+            URL url = new URL(myURL);
+            URLConnection con = url.openConnection();
+            con.setRequestProperty("Cookie", "RCPC=2410eb50f427b51e1dab0380761323bf");
+            
+            fb.setConnection(con);
+        } catch (MalformedURLException e) {
+            throw new ParserException("Parsing failed, URL Connection input is malformed.");
+        } catch (IOException e) {
+            throw new ParserException("Parsing failed, URL Connection cannot be sustained.");
+        }
+                
         // extract problem name
         fb.setFilters(new NodeFilter[] {
             new CssSelectorNodeFilter("div.header"),
